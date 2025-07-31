@@ -3,41 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teaser Tarefas</title>
+    <title>Teaser Tarefas (Colaborativo)</title>
+    
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Fontes e Ícones -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #111827; /* bg-gray-900 */
-        }
-        .priority-alta { border-left-color: #EF4444; } /* red-500 */
-        .priority-media { border-left-color: #F59E0B; } /* amber-500 */
-        .priority-baixa { border-left-color: #3B82F6; } /* blue-500 */
-        .task-card:hover { transform: translateY(-2px); background-color: #374151; } /* bg-gray-700 */
-        .calendar-day.selected { background-color: #4F46E5; color: white; } /* indigo-600 */
-        .calendar-day:not(.disabled):hover { background-color: #374151; } /* bg-gray-700 */
-        .modal-backdrop {
-            background-color: rgba(0, 0, 0, 0.7);
-        }
-    </style>
+    
+    <!-- Folha de Estilos Personalizada -->
+    <link rel="stylesheet" href="style.css">
 </head>
 <body class="text-gray-200">
+
+    <!-- Overlay de Carregamento -->
+    <div id="loadingOverlay" class="fixed inset-0 z-50 flex flex-col items-center justify-center text-white">
+        <i class="fas fa-sync-alt fa-spin fa-3x mb-4"></i>
+        <p class="text-xl">Conectando ao servidor...</p>
+    </div>
 
     <!-- Container Principal -->
     <div class="container mx-auto p-4 md:p-8 max-w-6xl">
         
         <header class="flex flex-col md:flex-row justify-between items-center mb-8">
             <div class="flex items-center space-x-4 mb-4 md:mb-0">
-                <!-- Espaço para Logo CORRIGIDO -->
                 <div class="h-14 w-14 rounded-lg shadow-md overflow-hidden flex-shrink-0">
                     <!-- IMPORTANTE: Substitua a URL abaixo pela URL da sua imagem -->
-                    <img src="img_teaser.jpg" alt="Logo Teaser Tarefas" class="h-full w-full object-cover">
+                    <img src="/imagem/img_teaser.jpg" alt="Logo Teaser Tarefas" class="h-full w-full object-cover">
                 </div>
                 <h1 class="text-3xl md:text-4xl font-bold text-white">Teaser Tarefas</h1>
             </div>
-            <button id="openModalBtn" class="w-full md:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition-transform transform hover:scale-105">
+            <button id="openModalBtn" class="w-full md:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition-transform transform hover:scale-105 disabled:bg-gray-500 disabled:cursor-not-allowed" disabled>
                 <i class="fas fa-plus mr-2"></i> Nova Tarefa
             </button>
         </header>
@@ -49,9 +46,7 @@
                 <h2 id="weekRange" class="text-xl font-semibold text-center"></h2>
                 <button id="nextWeekBtn" class="p-2 rounded-full hover:bg-gray-700 transition-colors"><i class="fas fa-chevron-right"></i></button>
             </div>
-            <div id="calendar" class="grid grid-cols-7 gap-2 text-center">
-                <!-- Dias da semana serão injetados aqui pelo JS -->
-            </div>
+            <div id="calendar" class="grid grid-cols-7 gap-2 text-center"></div>
         </div>
         
         <!-- Filtro Ativo -->
@@ -62,28 +57,21 @@
             </span>
         </div>
 
-
         <!-- Seção das Tarefas -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            
-            <!-- Coluna de Tarefas a Fazer -->
             <div>
                 <h2 class="text-2xl font-semibold mb-4 pb-2 border-b-2 border-gray-700 flex items-center">
                     <i class="fas fa-list-check mr-3 text-yellow-400"></i> A Fazer
                 </h2>
                 <div id="todoList" class="space-y-4">
-                    <!-- Tarefas a fazer serão injetadas aqui -->
-                     <p id="noTodoMsg" class="text-gray-400 text-center py-8">Nenhuma tarefa pendente para esta data. Adicione uma nova!</p>
+                     <p id="noTodoMsg" class="text-gray-400 text-center py-8">Nenhuma tarefa pendente para esta data.</p>
                 </div>
             </div>
-
-            <!-- Coluna de Tarefas Concluídas -->
             <div>
                 <h2 class="text-2xl font-semibold mb-4 pb-2 border-b-2 border-gray-700 flex items-center">
                     <i class="fas fa-check-double mr-3 text-green-400"></i> Concluídas
                 </h2>
                 <div id="completedList" class="space-y-4">
-                    <!-- Tarefas concluídas serão injetadas aqui -->
                     <p id="noCompletedMsg" class="text-gray-400 text-center py-8">Nenhuma tarefa concluída para esta data.</p>
                 </div>
             </div>
@@ -130,336 +118,8 @@
         </div>
     </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    // --- ELEMENTOS DO DOM ---
-    const taskModal = document.getElementById('taskModal');
-    const openModalBtn = document.getElementById('openModalBtn');
-    const closeModalBtn = document.getElementById('closeModalBtn');
-    const taskForm = document.getElementById('taskForm');
-    const modalTitle = document.getElementById('modalTitle');
-    const todoList = document.getElementById('todoList');
-    const completedList = document.getElementById('completedList');
-    const noTodoMsg = document.getElementById('noTodoMsg');
-    const noCompletedMsg = document.getElementById('noCompletedMsg');
-    const calendarEl = document.getElementById('calendar');
-    const weekRangeEl = document.getElementById('weekRange');
-    const prevWeekBtn = document.getElementById('prevWeekBtn');
-    const nextWeekBtn = document.getElementById('nextWeekBtn');
-    const activeFilterEl = document.getElementById('activeFilter');
-    const filterDateEl = document.getElementById('filterDate');
-    const clearFilterBtn = document.getElementById('clearFilterBtn');
-
-    // --- ESTADO DA APLICAÇÃO ---
-    let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
-    let currentDate = new Date();
-    let selectedDate = null; // null significa que nenhum filtro de data está ativo
-
-    // --- FUNÇÕES DO MODAL ---
-    const openModal = () => {
-        taskModal.classList.remove('hidden');
-        setTimeout(() => {
-            taskModal.querySelector('div').classList.remove('-translate-y-10', 'opacity-0');
-        }, 10);
-    };
-
-    const closeModal = () => {
-        taskModal.querySelector('div').classList.add('-translate-y-10', 'opacity-0');
-        setTimeout(() => {
-            taskModal.classList.add('hidden');
-            taskForm.reset();
-            document.getElementById('taskId').value = '';
-            modalTitle.textContent = 'Nova Tarefa';
-        }, 300);
-    };
-
-    // --- FUNÇÕES DE PERSISTÊNCIA ---
-    const saveTasks = () => {
-        localStorage.setItem('tasks', JSON.stringify(tasks));
-        renderAll();
-    };
-
-    // --- FUNÇÕES DE RENDERIZAÇÃO ---
-    
-    // Função principal que chama as outras renderizações
-    const renderAll = () => {
-        renderCalendar();
-        renderTasks();
-    }
-
-    // Renderiza o calendário semanal
-    const renderCalendar = () => {
-        calendarEl.innerHTML = '';
-        const weekStart = getWeekStart(currentDate);
-        const weekEnd = new Date(weekStart);
-        weekEnd.setDate(weekEnd.getDate() + 6);
-
-        weekRangeEl.textContent = `${formatDate(weekStart, {day: 'numeric', month: 'short'})} - ${formatDate(weekEnd, {day: 'numeric', month: 'short', year: 'numeric'})}`;
-
-        const dayHeaders = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
-        dayHeaders.forEach(day => {
-            const dayHeaderEl = document.createElement('div');
-            dayHeaderEl.className = 'font-bold text-gray-400 text-sm';
-            dayHeaderEl.textContent = day;
-            calendarEl.appendChild(dayHeaderEl);
-        });
-
-        for (let i = 0; i < 7; i++) {
-            const day = new Date(weekStart);
-            day.setDate(day.getDate() + i);
-            
-            const dayEl = document.createElement('button');
-            dayEl.className = 'calendar-day p-2 rounded-full transition-colors focus:outline-none';
-            dayEl.textContent = day.getDate();
-            dayEl.dataset.date = day.toISOString().split('T')[0];
-
-            if (isSameDay(day, new Date())) {
-                dayEl.classList.add('bg-indigo-500', 'text-white', 'font-bold');
-            }
-            
-            if (selectedDate && isSameDay(day, new Date(selectedDate))) {
-                dayEl.classList.add('selected');
-            }
-
-            // Adiciona um ponto se houver tarefas no dia
-            const tasksOnDay = tasks.filter(t => !t.isComplete && isSameDay(new Date(t.dueDate), day));
-            if (tasksOnDay.length > 0) {
-                const dot = document.createElement('div');
-                dot.className = 'w-1.5 h-1.5 bg-yellow-400 rounded-full mx-auto mt-1';
-                dayEl.appendChild(dot);
-            }
-
-            dayEl.addEventListener('click', () => {
-                selectedDate = dayEl.dataset.date;
-                activeFilterEl.classList.remove('hidden');
-                filterDateEl.textContent = formatDate(new Date(selectedDate), { weekday: 'long', day: 'numeric', month: 'long' });
-                renderAll();
-            });
-            calendarEl.appendChild(dayEl);
-        }
-    };
-
-    // Renderiza as listas de tarefas (A Fazer e Concluídas)
-    const renderTasks = () => {
-        todoList.innerHTML = '';
-        completedList.innerHTML = '';
-
-        let filteredTasks = tasks;
-        if (selectedDate) {
-            filteredTasks = tasks.filter(task => isSameDay(new Date(task.dueDate), new Date(selectedDate)));
-        }
-
-        const todoTasks = filteredTasks.filter(task => !task.isComplete);
-        const completedTasks = filteredTasks.filter(task => task.isComplete);
-        
-        // Ordena por prioridade: alta > media > baixa
-        todoTasks.sort((a, b) => {
-            const priorities = { alta: 0, media: 1, baixa: 2 };
-            return priorities[a.priority] - priorities[b.priority];
-        });
-
-        if (todoTasks.length === 0) {
-            todoList.appendChild(noTodoMsg);
-            noTodoMsg.classList.remove('hidden');
-        } else {
-            noTodoMsg.classList.add('hidden');
-            todoTasks.forEach(task => todoList.appendChild(createTaskElement(task)));
-        }
-
-        if (completedTasks.length === 0) {
-            completedList.appendChild(noCompletedMsg);
-            noCompletedMsg.classList.remove('hidden');
-        } else {
-            noCompletedMsg.classList.add('hidden');
-            completedTasks.forEach(task => completedList.appendChild(createTaskElement(task)));
-        }
-    };
-
-    // Cria o elemento HTML para uma única tarefa
-    const createTaskElement = (task) => {
-        const card = document.createElement('div');
-        card.className = `task-card bg-gray-800 p-4 rounded-lg shadow-md border-l-4 transition-all duration-300 priority-${task.priority}`;
-        card.dataset.id = task.id;
-
-        const formattedDate = formatDate(new Date(task.dueDate));
-        const categoryBadge = task.category ? `<span class="bg-gray-600 text-indigo-300 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-full">${task.category}</span>` : '';
-
-        card.innerHTML = `
-            <div class="flex justify-between items-start">
-                <div>
-                    <h3 class="font-bold text-lg text-white">${task.title}</h3>
-                    <p class="text-gray-400 text-sm mt-1">${task.description}</p>
-                </div>
-                <div class="flex-shrink-0 flex items-center space-x-2 ml-2">
-                    ${!task.isComplete ? `
-                    <button class="complete-btn text-green-400 hover:text-green-300" title="Concluir"><i class="fas fa-check-circle fa-lg"></i></button>
-                    <button class="edit-btn text-blue-400 hover:text-blue-300" title="Editar"><i class="fas fa-edit fa-lg"></i></button>
-                    ` : `
-                    <button class="uncomplete-btn text-yellow-400 hover:text-yellow-300" title="Reabrir"><i class="fas fa-undo fa-lg"></i></button>
-                    `}
-                    <button class="delete-btn text-red-500 hover:text-red-400" title="Excluir"><i class="fas fa-trash-alt fa-lg"></i></button>
-                </div>
-            </div>
-            <div class="mt-3 pt-3 border-t border-gray-700 flex justify-between items-center">
-                <span class="text-xs text-gray-400"><i class="fas fa-calendar-alt mr-2"></i>${formattedDate}</span>
-                ${categoryBadge}
-            </div>
-        `;
-
-        // Adiciona event listeners para os botões da tarefa
-        card.querySelector('.delete-btn')?.addEventListener('click', () => deleteTask(task.id));
-        card.querySelector('.edit-btn')?.addEventListener('click', () => editTask(task.id));
-        card.querySelector('.complete-btn')?.addEventListener('click', () => toggleComplete(task.id, true));
-        card.querySelector('.uncomplete-btn')?.addEventListener('click', () => toggleComplete(task.id, false));
-
-        return card;
-    };
-
-
-    // --- FUNÇÕES DE MANIPULAÇÃO DE TAREFAS ---
-    const handleFormSubmit = (e) => {
-        e.preventDefault();
-        const id = document.getElementById('taskId').value;
-        const title = document.getElementById('title').value.trim();
-        const description = document.getElementById('description').value.trim();
-        const dueDate = document.getElementById('dueDate').value;
-        const priority = document.getElementById('priority').value;
-        const category = document.getElementById('category').value.trim();
-
-        if (!title || !dueDate) {
-            alert('Título e Data de Vencimento são obrigatórios.');
-            return;
-        }
-
-        if (id) {
-            // Editando tarefa existente
-            const taskIndex = tasks.findIndex(task => task.id == id);
-            if (taskIndex > -1) {
-                tasks[taskIndex] = { ...tasks[taskIndex], title, description, dueDate, priority, category };
-            }
-        } else {
-            // Criando nova tarefa
-            const newTask = {
-                id: Date.now(),
-                title,
-                description,
-                dueDate,
-                priority,
-                category,
-                isComplete: false
-            };
-            tasks.push(newTask);
-        }
-
-        saveTasks();
-        closeModal();
-    };
-
-    const editTask = (id) => {
-        const task = tasks.find(task => task.id == id);
-        if (task) {
-            modalTitle.textContent = 'Editar Tarefa';
-            document.getElementById('taskId').value = task.id;
-            document.getElementById('title').value = task.title;
-            document.getElementById('description').value = task.description;
-            document.getElementById('dueDate').value = task.dueDate;
-            document.getElementById('priority').value = task.priority;
-            document.getElementById('category').value = task.category;
-            openModal();
-        }
-    };
-    
-    const deleteTask = (id) => {
-        if (confirm('Tem certeza que deseja excluir esta tarefa permanentemente?')) {
-            tasks = tasks.filter(task => task.id != id);
-            saveTasks();
-        }
-    };
-
-    const toggleComplete = (id, status) => {
-        const taskIndex = tasks.findIndex(task => task.id == id);
-        if (taskIndex > -1) {
-            tasks[taskIndex].isComplete = status;
-            saveTasks();
-        }
-    };
-
-    // --- FUNÇÕES UTILITÁRIAS DE DATA ---
-    const getWeekStart = (date) => {
-        const d = new Date(date);
-        const day = d.getDay();
-        const diff = d.getDate() - day;
-        return new Date(d.setDate(diff));
-    };
-
-    const isSameDay = (date1, date2) => {
-        // CORREÇÃO: Usando métodos UTC para evitar problemas de fuso horário.
-        // As strings de data (ex: '2025-07-30') são interpretadas como meia-noite UTC.
-        return date1.getUTCFullYear() === date2.getUTCFullYear() &&
-               date1.getUTCMonth() === date2.getUTCMonth() &&
-               date1.getUTCDate() === date2.getUTCDate();
-    };
-    
-    const formatDate = (date, options = { year: 'numeric', month: 'long', day: 'numeric' }) => {
-        // Usar timeZone: 'UTC' para garantir que a data formatada corresponda à data de entrada, sem deslocamento de fuso.
-        return new Date(date).toLocaleDateString('pt-BR', { timeZone: 'UTC', ...options });
-    };
-
-    // --- INICIALIZAÇÃO E EVENT LISTENERS GLOBAIS ---
-    
-    // Adiciona uma tarefa de exemplo se for a primeira vez
-    if (localStorage.getItem('tasks') === null) {
-        const today = new Date();
-        tasks.push({
-            id: Date.now(),
-            title: "Estudar conversação",
-            description: "Praticar por 25 minutos, como planejado.",
-            dueDate: today.toISOString().split('T')[0],
-            priority: "alta",
-            category: "Estudos",
-            isComplete: false
-        });
-        saveTasks();
-    }
-    
-    openModalBtn.addEventListener('click', () => {
-        taskForm.reset();
-        document.getElementById('taskId').value = '';
-        modalTitle.textContent = 'Nova Tarefa';
-        // Sugere a data selecionada no calendário ou hoje
-        document.getElementById('dueDate').value = selectedDate || new Date().toISOString().split('T')[0];
-        openModal();
-    });
-    closeModalBtn.addEventListener('click', closeModal);
-    taskForm.addEventListener('submit', handleFormSubmit);
-    
-    prevWeekBtn.addEventListener('click', () => {
-        currentDate.setDate(currentDate.getDate() - 7);
-        renderCalendar();
-    });
-
-    nextWeekBtn.addEventListener('click', () => {
-        currentDate.setDate(currentDate.getDate() + 7);
-        renderCalendar();
-    });
-
-    clearFilterBtn.addEventListener('click', () => {
-        selectedDate = null;
-        activeFilterEl.classList.add('hidden');
-        renderAll();
-    });
-
-    // Fechar modal ao clicar fora
-    taskModal.addEventListener('click', (e) => {
-        if (e.target === taskModal) {
-            closeModal();
-        }
-    });
-
-    // Inicia a aplicação
-    renderAll();
-});
-</script>
+    <!-- Script de Funcionalidades -->
+    <script type="module" src="script.js"></script>
 
 </body>
 </html>

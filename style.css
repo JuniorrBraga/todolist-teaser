@@ -1,0 +1,24 @@
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #111827; /* bg-gray-900 */
+}
+.priority-alta { border-left-color: #EF4444; } /* red-500 */
+.priority-media { border-left-color: #F59E0B; } /* amber-500 */
+.priority-baixa { border-left-color: #3B82F6; } /* blue-500 */
+.task-card:hover { 
+    transform: translateY(-2px); 
+    background-color: #374151; /* bg-gray-700 */
+}
+.calendar-day.selected { 
+    background-color: #4F46E5; /* indigo-600 */
+    color: white; 
+}
+.calendar-day:not(.disabled):hover { 
+    background-color: #374151; /* bg-gray-700 */
+}
+.modal-backdrop { 
+    background-color: rgba(0, 0, 0, 0.7); 
+}
+#loadingOverlay { 
+    background-color: rgba(17, 24, 39, 0.8); 
+}
