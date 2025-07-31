@@ -1,20 +1,28 @@
 // Importações do Firebase SDK
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-import { getFirestore, collection, onSnapshot, doc, addDoc, updateDoc, deleteDoc, serverTimestamp, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+import { getFirestore, collection, onSnapshot, doc, addDoc, updateDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
 // --- CONFIGURAÇÃO E INICIALIZAÇÃO DO FIREBASE ---
 
-// As variáveis __app_id e __firebase_config são injetadas pelo ambiente.
-const appId = typeof __app_id !== 'undefined' ? __app_id : 'teaser-tarefas-app';
-const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : { apiKey: "YOUR_API_KEY", authDomain: "YOUR_AUTH_DOMAIN", projectId: "YOUR_PROJECT_ID" };
+// Suas chaves do Firebase foram adicionadas aqui.
+const firebaseConfig = {
+  apiKey: "AIzaSyCkmtI3GPNiDkFyQ6Sm3_KfM-12SuYbU_M",
+  authDomain: "todolist-teaser.firebaseapp.com",
+  projectId: "todolist-teaser",
+  storageBucket: "todolist-teaser.firebasestorage.app",
+  messagingSenderId: "72112680265",
+  appId: "1:72112680265:web:79700b6c5259298e2ebe98",
+  measurementId: "G-F8L2MTFKP3"
+};
 
+// Inicializa o Firebase com suas chaves
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// Coleção pública de tarefas
-const tasksCollection = collection(db, `artifacts/${appId}/public/data/tasks`);
+// A coleção agora usa o seu projectId para criar um caminho único para os dados.
+const tasksCollection = collection(db, `tasks`);
 
 // --- ELEMENTOS DO DOM ---
 const loadingOverlay = document.getElementById('loadingOverlay');
@@ -43,11 +51,7 @@ let selectedDate = null;
 // --- FUNÇÕES DE AUTENTICAÇÃO E INICIALIZAÇÃO ---
 async function main() {
     try {
-        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-            await signInWithCustomToken(auth, __initial_auth_token);
-        } else {
-            await signInAnonymously(auth);
-        }
+        await signInAnonymously(auth);
         
         // Escuta por mudanças em tempo real na coleção de tarefas
         onSnapshot(tasksCollection, (snapshot) => {
@@ -65,7 +69,7 @@ async function main() {
 
     } catch (error) {
         console.error("Erro na inicialização ou autenticação:", error);
-        loadingOverlay.innerHTML = "<p>Ocorreu um erro ao conectar. Tente recarregar a página.</p>";
+        loadingOverlay.innerHTML = "<p>Ocorreu um erro ao conectar. Verifique as chaves do Firebase e recarregue a página.</p>";
     }
 }
 
@@ -238,7 +242,7 @@ async function handleFormSubmit(e) {
 
     try {
         if (id) {
-            const taskRef = doc(db, `artifacts/${appId}/public/data/tasks`, id);
+            const taskRef = doc(db, "tasks", id);
             await updateDoc(taskRef, taskData);
         } else {
             await addDoc(tasksCollection, {
@@ -271,7 +275,7 @@ async function editTask(id) {
 async function deleteTask(id) {
     if (confirm('Tem certeza que deseja excluir esta tarefa permanentemente?')) {
         try {
-            await deleteDoc(doc(db, `artifacts/${appId}/public/data/tasks`, id));
+            await deleteDoc(doc(db, "tasks", id));
         } catch (error) {
             console.error("Erro ao excluir tarefa:", error);
             alert("Não foi possível excluir a tarefa.");
@@ -281,7 +285,7 @@ async function deleteTask(id) {
 
 async function toggleComplete(id, status) {
     try {
-        const taskRef = doc(db, `artifacts/${appId}/public/data/tasks`, id);
+        const taskRef = doc(db, "tasks", id);
         await updateDoc(taskRef, { isComplete: status });
     } catch (error) {
         console.error("Erro ao atualizar tarefa:", error);
