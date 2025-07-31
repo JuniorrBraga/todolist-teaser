@@ -57,10 +57,7 @@ async function main() {
         onSnapshot(tasksCollection, (snapshot) => {
             allTasks = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             
-            // Adiciona tarefa de exemplo se a coleção estiver vazia
-            if (allTasks.length === 0) {
-                addExampleTask();
-            }
+            // CORREÇÃO: A linha que criava a tarefa de exemplo foi removida daqui.
             
             renderAll();
             loadingOverlay.style.display = 'none';
@@ -292,22 +289,6 @@ async function toggleComplete(id, status) {
         alert("Não foi possível atualizar o status da tarefa.");
     }
 };
-
-async function addExampleTask() {
-    try {
-        await addDoc(tasksCollection, {
-            title: "Estudar conversação",
-            description: "Praticar por 25 minutos, como planejado.",
-            dueDate: new Date().toISOString().split('T')[0],
-            priority: "alta",
-            category: "Estudos",
-            isComplete: false,
-            createdAt: serverTimestamp()
-        });
-    } catch(error) {
-        console.error("Erro ao adicionar tarefa de exemplo: ", error);
-    }
-}
 
 // --- FUNÇÕES UTILITÁRIAS DE DATA ---
 const getWeekStart = (date) => {
