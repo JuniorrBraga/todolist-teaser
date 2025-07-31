@@ -120,12 +120,16 @@ const renderCalendar = () => {
         const dayString = day.toISOString().split('T')[0];
         dayEl.dataset.date = dayString;
 
-        if (isSameDay(day, new Date())) {
-            dayEl.classList.add('bg-indigo-500', 'text-white', 'font-bold');
-        }
-        
-        if (selectedDate && dayString === selectedDate) {
+        const isToday = isSameDay(day, new Date());
+        const isSelected = selectedDate === dayString;
+
+        // LÓGICA DE DESTAQUE CORRIGIDA E REFINADA
+        if (isSelected) {
+            // Aplica o estilo de selecionado se este for o dia clicado.
             dayEl.classList.add('selected');
+        } else if (isToday && selectedDate === null) {
+            // Aplica o estilo de "hoje" apenas se nenhum outro dia estiver selecionado.
+            dayEl.classList.add('bg-indigo-500', 'text-white', 'font-bold');
         }
 
         const tasksOnDay = allTasks.filter(t => !t.isComplete && t.dueDate === dayString);
