@@ -57,8 +57,6 @@ async function main() {
         onSnapshot(tasksCollection, (snapshot) => {
             allTasks = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             
-            // CORREÇÃO: A linha que criava a tarefa de exemplo foi removida daqui.
-            
             renderAll();
             loadingOverlay.style.display = 'none';
             openModalBtn.disabled = false;
