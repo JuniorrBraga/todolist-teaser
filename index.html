@@ -49,13 +49,14 @@
             <div id="calendar" class="grid grid-cols-7 gap-2 text-center"></div>
         </div>
         
-        <!-- Filtro Ativo -->
+        <!-- Filtro Ativo (Layout para celular corrigido) -->
         <div id="activeFilter" class="text-center mb-6 hidden">
-            <span class="bg-gray-700 text-indigo-300 py-2 px-4 rounded-full text-lg">
-                Mostrando tarefas para: <strong id="filterDate"></strong>
-                <button id="clearFilterBtn" class="ml-3 text-red-400 hover:text-red-300 text-sm">[Limpar Filtro]</button>
+            <span class="bg-gray-700 text-indigo-300 py-2 px-4 rounded-full text-base md:text-lg inline-flex flex-wrap items-center justify-center gap-x-2 gap-y-1">
+                <span>Mostrando tarefas para:</span> <strong id="filterDate"></strong>
+                <button id="clearFilterBtn" class="ml-2 text-red-400 hover:text-red-300 text-sm">[Limpar]</button>
             </span>
         </div>
+
 
         <!-- Seção das Tarefas -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
