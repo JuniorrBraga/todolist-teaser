@@ -53,10 +53,8 @@ async function main() {
     try {
         await signInAnonymously(auth);
         
-        // Escuta por mudanças em tempo real na coleção de tarefas
         onSnapshot(tasksCollection, (snapshot) => {
             allTasks = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            
             renderAll();
             loadingOverlay.style.display = 'none';
             openModalBtn.disabled = false;
@@ -123,12 +121,9 @@ const renderCalendar = () => {
         const isToday = isSameDay(day, new Date());
         const isSelected = selectedDate === dayString;
 
-        // LÓGICA DE DESTAQUE CORRIGIDA E REFINADA
         if (isSelected) {
-            // Aplica o estilo de selecionado se este for o dia clicado.
             dayEl.classList.add('selected');
         } else if (isToday && selectedDate === null) {
-            // Aplica o estilo de "hoje" apenas se nenhum outro dia estiver selecionado.
             dayEl.classList.add('bg-indigo-500', 'text-white', 'font-bold');
         }
 
@@ -152,14 +147,24 @@ const renderCalendar = () => {
 const renderTasks = () => {
     todoList.innerHTML = '';
     completedList.innerHTML = '';
+    const todayString = new Date().toISOString().split('T')[0];
 
-    let filteredTasks = allTasks;
+    let todoTasks;
+    let completedTasks;
+
     if (selectedDate) {
-        filteredTasks = allTasks.filter(task => task.dueDate === selectedDate);
+        // --- VISÃO DE UM DIA ESPECÍFICO ---
+        todoTasks = allTasks.filter(task => !task.isComplete && task.dueDate === selectedDate);
+        completedTasks = allTasks.filter(task => task.isComplete && task.dueDate === selectedDate);
+        noTodoMsg.textContent = "Nenhuma tarefa pendente para esta data.";
+        noCompletedMsg.textContent = "Nenhuma tarefa concluída para esta data.";
+    } else {
+        // --- VISÃO GERAL (SEM DATA SELECIONADA) ---
+        todoTasks = allTasks.filter(task => !task.isComplete);
+        completedTasks = allTasks.filter(task => task.isComplete && task.dueDate >= todayString);
+        noTodoMsg.textContent = "Nenhuma tarefa pendente.";
+        noCompletedMsg.textContent = "Nenhuma tarefa concluída recentemente.";
     }
-
-    const todoTasks = filteredTasks.filter(task => !task.isComplete);
-    const completedTasks = filteredTasks.filter(task => task.isComplete);
     
     todoTasks.sort((a, b) => {
         const priorities = { alta: 0, media: 1, baixa: 2 };
